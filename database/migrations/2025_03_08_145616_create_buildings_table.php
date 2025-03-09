@@ -21,8 +21,11 @@ return new class extends Migration
             $table->string('state');
             $table->string('country');
             $table->string('postal_code');
-            $table->decimal('gis_latitude', 10, 8)->nullable();
-            $table->decimal('gis_longitude', 11, 8)->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->integer('total_floors')->default(0);
+            $table->decimal('total_area', 12, 2)->default(0);
+            $table->integer('year_built')->nullable();
             $table->string('status')->default('active');
             $table->json('metadata')->nullable();
             $table->timestamps();

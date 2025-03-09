@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('building_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('floor_number');
-            $table->decimal('area', 10, 2)->nullable();
-            $table->string('floor_plan_url')->nullable();
+            $table->string('code')->unique();
+            $table->integer('level');
+            $table->text('description')->nullable();
+            $table->decimal('total_area', 12, 2)->default(0);
+            $table->decimal('common_area', 12, 2)->default(0);
+            $table->decimal('rentable_area', 12, 2)->default(0);
             $table->string('status')->default('active');
             $table->json('metadata')->nullable();
             $table->timestamps();

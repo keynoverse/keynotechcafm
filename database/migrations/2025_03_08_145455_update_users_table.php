@@ -12,11 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('status')->default('active');
-            $table->string('employee_id')->nullable()->unique();
+            $table->string('employee_id')->nullable()->after('remember_token');
             $table->string('department')->nullable();
             $table->string('position')->nullable();
             $table->string('phone')->nullable();
+            $table->string('status')->default('active');
+            $table->json('metadata')->nullable();
+            $table->string('role')->default('user');
             $table->timestamp('last_login')->nullable();
             $table->json('preferences')->nullable();
             $table->softDeletes();
@@ -30,11 +32,13 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'status',
                 'employee_id',
                 'department',
                 'position',
                 'phone',
+                'status',
+                'metadata',
+                'role',
                 'last_login',
                 'preferences',
             ]);

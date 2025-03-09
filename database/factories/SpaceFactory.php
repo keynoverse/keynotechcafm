@@ -2,73 +2,62 @@
 
 namespace Database\Factories;
 
-use App\Models\Floor;
 use App\Models\Space;
+use App\Models\Floor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SpaceFactory extends Factory
 {
     protected $model = Space::class;
 
+    private static $spaceNumber = 1;
+
     public function definition(): array
     {
+        $code = 'SPC' . str_pad(static::$spaceNumber++, 4, '0', STR_PAD_LEFT);
+        
         return [
             'floor_id' => Floor::factory(),
-            'name' => fn (array $attributes) => fake()->randomElement([
-                'Office',
-                'Conference Room',
-                'Meeting Room',
-                'Break Room',
-                'Storage Room',
-                'Server Room',
-                'Reception',
-                'Open Space'
-            ]) . ' ' . fake()->numberBetween(100, 999),
-            'code' => fn (array $attributes) => 'SPC' . fake()->unique()->numberBetween(1000, 9999),
-            'type' => fake()->randomElement([
-                'office',
-                'meeting',
-                'storage',
-                'common',
-                'technical',
-                'utility'
-            ]),
-            'description' => fake()->paragraph(),
-            'area' => fake()->numberBetween(20, 200),
-            'capacity' => fake()->numberBetween(1, 50),
-            'status' => fake()->randomElement(['active', 'inactive', 'maintenance', 'renovation']),
-            'metadata' => [
-                'features' => fake()->randomElements([
-                    'Air Conditioning',
-                    'Natural Light',
-                    'Projector',
-                    'TV Screen',
-                    'Whiteboard',
-                    'Network Points',
-                    'Power Outlets',
-                    'Phone Line'
-                ], rand(3, 6)),
+            'code' => $code,
+            'name' => $this->faker->unique()->words(3, true),
+            'type' => $this->faker->randomElement(['office', 'meeting_room', 'storage', 'break_room', 'reception', 'server_room', 'utility']),
+            'description' => $this->faker->paragraph(),
+            'status' => $this->faker->randomElement(['active', 'inactive', 'under_maintenance', 'under_renovation']),
+            'area' => $this->faker->numberBetween(20, 500),
+            'capacity' => $this->faker->numberBetween(1, 50),
+            'occupancy' => $this->faker->numberBetween(0, 50),
+            'metadata' => json_encode([
+                'features' => $this->faker->randomElements([
+                    'windows', 'natural_light', 'climate_control', 'network_ports',
+                    'projector', 'whiteboard', 'video_conferencing', 'phone_booth'
+                ], $this->faker->numberBetween(2, 6)),
                 'furniture' => [
-                    'desks' => fake()->numberBetween(0, 10),
-                    'chairs' => fake()->numberBetween(0, 20),
-                    'cabinets' => fake()->numberBetween(0, 5)
+                    'desks' => $this->faker->numberBetween(0, 20),
+                    'chairs' => $this->faker->numberBetween(0, 40),
+                    'cabinets' => $this->faker->numberBetween(0, 10),
+                    'tables' => $this->faker->numberBetween(0, 5)
+                ],
+                'utilities' => [
+                    'power_outlets' => $this->faker->numberBetween(4, 20),
+                    'ethernet_ports' => $this->faker->numberBetween(2, 10),
+                    'phone_lines' => $this->faker->numberBetween(0, 5)
                 ],
                 'environment' => [
-                    'temperature' => fake()->numberBetween(20, 25),
-                    'humidity' => fake()->numberBetween(40, 60),
-                    'noise_level' => fake()->randomElement(['Low', 'Medium', 'High'])
+                    'temperature_zone' => $this->faker->randomElement(['zone_a', 'zone_b', 'zone_c']),
+                    'lighting_zone' => $this->faker->randomElement(['zone_1', 'zone_2', 'zone_3']),
+                    'noise_level' => $this->faker->randomElement(['low', 'medium', 'high'])
                 ],
                 'access_control' => [
-                    'type' => fake()->randomElement(['Card Access', 'Key', 'None']),
-                    'restricted' => fake()->boolean(),
-                    'hours' => fake()->randomElement(['24/7', '8AM-6PM', '7AM-7PM'])
+                    'type' => $this->faker->randomElement(['keycard', 'pin', 'biometric', 'key']),
+                    'security_level' => $this->faker->randomElement(['low', 'medium', 'high']),
+                    'restricted' => $this->faker->boolean(30)
                 ],
-                'maintenance' => [
-                    'last_inspection' => fake()->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
-                    'next_inspection' => fake()->dateTimeBetween('now', '+1 year')->format('Y-m-d'),
-                    'cleaning_schedule' => fake()->randomElement(['Daily', 'Weekly', 'Monthly'])
+                'scheduling' => [
+                    'bookable' => $this->faker->boolean(70),
+                    'min_booking_duration' => $this->faker->randomElement(['30m', '1h', '2h', '4h']),
+                    'max_booking_duration' => $this->faker->randomElement(['4h', '8h', '1d'])
                 ]
-            ]
+            ])
         ];
     }
 

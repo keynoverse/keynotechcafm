@@ -13,54 +13,54 @@ class AssetFactory extends Factory
 
     public function definition(): array
     {
+        static $assetNumber = 1;
+
         return [
             'category_id' => AssetCategory::factory(),
             'space_id' => Space::factory(),
-            'name' => fake()->words(3, true),
-            'code' => 'AST' . fake()->unique()->numberBetween(1000, 9999),
-            'description' => fake()->paragraph(),
-            'model' => fake()->bothify('???-####'),
-            'manufacturer' => fake()->company(),
-            'serial_number' => fake()->unique()->bothify('SN-??????##??##'),
-            'purchase_date' => fake()->dateTimeBetween('-5 years', 'now'),
-            'purchase_cost' => fake()->randomFloat(2, 100, 10000),
-            'warranty_expiry' => fn (array $attributes) => fake()->dateTimeBetween($attributes['purchase_date'], '+5 years'),
-            'maintenance_frequency' => fake()->numberBetween(30, 365),
-            'maintenance_unit' => fake()->randomElement(['days', 'weeks', 'months', 'years']),
-            'next_maintenance_date' => fake()->dateTimeBetween('now', '+1 year'),
-            'status' => fake()->randomElement(['active', 'inactive', 'maintenance', 'storage']),
-            'condition' => fake()->randomElement(['excellent', 'good', 'fair', 'poor']),
-            'criticality' => fake()->randomElement(['high', 'medium', 'low']),
-            'metadata' => [
+            'name' => $this->faker->words(3, true),
+            'code' => 'AST' . str_pad($assetNumber++, 4, '0', STR_PAD_LEFT),
+            'description' => $this->faker->paragraph(),
+            'model' => strtolower($this->faker->bothify('???-####')),
+            'manufacturer' => $this->faker->company(),
+            'serial_number' => 'SN-' . strtolower($this->faker->bothify('??????????##')),
+            'purchase_date' => $this->faker->dateTimeBetween('-5 years', 'now'),
+            'purchase_cost' => $this->faker->randomFloat(2, 100, 10000),
+            'warranty_expiry' => $this->faker->dateTimeBetween('now', '+5 years'),
+            'maintenance_frequency' => $this->faker->numberBetween(30, 365),
+            'maintenance_unit' => $this->faker->randomElement(['days', 'weeks', 'months']),
+            'next_maintenance_date' => $this->faker->dateTimeBetween('now', '+2 years'),
+            'status' => $this->faker->randomElement(['active', 'inactive', 'maintenance', 'repair']),
+            'condition' => $this->faker->randomElement(['excellent', 'good', 'fair', 'poor']),
+            'criticality' => $this->faker->randomElement(['low', 'medium', 'high', 'critical']),
+            'metadata' => json_encode([
                 'specifications' => [
-                    'dimensions' => fake()->randomElement(['60x60x120cm', '80x80x150cm', '100x100x180cm']),
-                    'weight' => fake()->numberBetween(5, 100) . 'kg',
-                    'power_requirements' => fake()->randomElement(['110V', '220V', 'N/A']),
-                    'operating_temperature' => fake()->numberBetween(15, 30) . '°C'
+                    'dimensions' => $this->faker->numberBetween(20, 100) . 'x' . 
+                                  $this->faker->numberBetween(20, 100) . 'x' . 
+                                  $this->faker->numberBetween(20, 200) . 'cm',
+                    'weight' => $this->faker->numberBetween(1, 100) . 'kg',
+                    'power_requirements' => $this->faker->randomElement(['110V', '220V', '12V DC', 'N/A']),
+                    'operating_temperature' => $this->faker->numberBetween(15, 30) . '°C'
                 ],
                 'warranty_info' => [
-                    'provider' => fake()->company(),
-                    'type' => fake()->randomElement(['Full Coverage', 'Limited', 'Parts Only']),
-                    'contact' => fake()->phoneNumber()
+                    'provider' => $this->faker->company(),
+                    'type' => $this->faker->randomElement(['Full', 'Limited', 'Parts Only']),
+                    'contact' => $this->faker->phoneNumber()
                 ],
                 'maintenance_history' => [
-                    'last_service' => fake()->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
-                    'service_provider' => fake()->company(),
-                    'total_downtime' => fake()->numberBetween(0, 100) . ' hours'
+                    'last_service' => $this->faker->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
+                    'service_provider' => $this->faker->company(),
+                    'total_downtime' => $this->faker->numberBetween(0, 100) . ' hours'
                 ],
-                'certifications' => fake()->randomElements([
-                    'ISO 9001',
-                    'CE',
-                    'UL Listed',
-                    'Energy Star',
-                    'RoHS'
-                ], rand(1, 3)),
+                'certifications' => $this->faker->randomElements([
+                    'CE', 'UL Listed', 'Energy Star', 'ISO 9001', 'RoHS'
+                ], $this->faker->numberBetween(1, 3)),
                 'documents' => [
-                    'manual_url' => fake()->url(),
-                    'warranty_doc' => fake()->url(),
-                    'service_history' => fake()->url()
+                    'manual_url' => $this->faker->url(),
+                    'warranty_doc' => $this->faker->url(),
+                    'service_history' => $this->faker->url()
                 ]
-            ]
+            ])
         ];
     }
 

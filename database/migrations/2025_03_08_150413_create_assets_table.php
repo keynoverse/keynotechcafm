@@ -13,19 +13,23 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->constrained('asset_categories')->onDelete('restrict');
+            $table->foreignId('space_id')->nullable()->constrained()->onDelete('set null');
             $table->string('name');
-            $table->string('asset_number')->unique();
-            $table->foreignId('category_id')->constrained('asset_categories');
-            $table->string('status')->default('active');
-            $table->foreignId('space_id')->nullable()->constrained();
-            $table->date('purchase_date')->nullable();
-            $table->date('warranty_expiry')->nullable();
-            $table->decimal('purchase_cost', 15, 2)->nullable();
-            $table->string('manufacturer')->nullable();
+            $table->string('code')->unique();
+            $table->text('description')->nullable();
             $table->string('model')->nullable();
+            $table->string('manufacturer')->nullable();
             $table->string('serial_number')->nullable();
-            $table->string('qr_code')->unique();
-            $table->json('specifications')->nullable();
+            $table->timestamp('purchase_date')->nullable();
+            $table->decimal('purchase_cost', 12, 2)->nullable();
+            $table->timestamp('warranty_expiry')->nullable();
+            $table->integer('maintenance_frequency')->nullable();
+            $table->string('maintenance_unit')->nullable();
+            $table->timestamp('next_maintenance_date')->nullable();
+            $table->string('status')->default('active');
+            $table->string('condition')->default('good');
+            $table->string('criticality')->default('low');
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->softDeletes();

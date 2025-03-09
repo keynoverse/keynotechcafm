@@ -26,32 +26,31 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
-            'employee_id' => 'EMP' . fake()->unique()->numberBetween(1000, 9999),
-            'department' => fake()->randomElement(['Maintenance', 'Facilities', 'IT', 'HR', 'Finance']),
-            'position' => fake()->jobTitle(),
-            'phone' => fake()->phoneNumber(),
-            'status' => fake()->randomElement(['active', 'inactive']),
-            'metadata' => [
-                'address' => fake()->address(),
+            'employee_id' => 'EMP' . $this->faker->unique()->numberBetween(1000, 9999),
+            'department' => $this->faker->randomElement(['IT', 'Maintenance', 'Facilities', 'Finance', 'HR']),
+            'position' => $this->faker->jobTitle(),
+            'phone' => $this->faker->phoneNumber(),
+            'status' => $this->faker->randomElement(['active', 'inactive']),
+            'metadata' => json_encode([
+                'address' => $this->faker->address(),
                 'emergency_contact' => [
-                    'name' => fake()->name(),
-                    'phone' => fake()->phoneNumber(),
-                    'relationship' => fake()->randomElement(['Spouse', 'Parent', 'Sibling', 'Friend'])
+                    'name' => $this->faker->name(),
+                    'phone' => $this->faker->phoneNumber(),
+                    'relationship' => $this->faker->randomElement(['Spouse', 'Parent', 'Sibling', 'Friend'])
                 ],
-                'skills' => fake()->randomElements([
-                    'HVAC',
-                    'Plumbing',
-                    'Electrical',
-                    'Carpentry',
-                    'IT Support',
-                    'Project Management'
-                ], rand(1, 3))
-            ]
+                'skills' => $this->faker->randomElements([
+                    'HVAC', 'Plumbing', 'Electrical', 'Carpentry', 'IT', 'Security'
+                ], $this->faker->numberBetween(1, 3)),
+                'certifications' => $this->faker->randomElements([
+                    'First Aid', 'OSHA', 'EPA', 'LEED', 'Security+'
+                ], $this->faker->numberBetween(0, 2))
+            ]),
+            'role' => $this->faker->randomElement(['admin', 'manager', 'technician', 'user'])
         ];
     }
 

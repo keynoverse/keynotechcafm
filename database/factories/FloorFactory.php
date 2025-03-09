@@ -2,48 +2,56 @@
 
 namespace Database\Factories;
 
-use App\Models\Building;
 use App\Models\Floor;
+use App\Models\Building;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FloorFactory extends Factory
 {
     protected $model = Floor::class;
 
+    private static $floorNumber = 1;
+
     public function definition(): array
     {
+        $code = 'FLR' . str_pad(static::$floorNumber++, 4, '0', STR_PAD_LEFT);
+        
         return [
             'building_id' => Building::factory(),
-            'name' => fn (array $attributes) => fake()->randomElement(['Ground Floor', '1st Floor', '2nd Floor', '3rd Floor', 'Basement', 'Mezzanine']) . ' ' . fake()->numberBetween(1, 50),
-            'code' => fn (array $attributes) => 'FLR' . fake()->unique()->numberBetween(1000, 9999),
-            'level' => fake()->numberBetween(-2, 50),
-            'description' => fake()->paragraph(),
-            'total_area' => fake()->numberBetween(500, 5000),
-            'common_area' => fake()->numberBetween(100, 1000),
-            'rentable_area' => fn (array $attributes) => $attributes['total_area'] - $attributes['common_area'],
-            'status' => fake()->randomElement(['active', 'inactive', 'maintenance', 'renovation']),
-            'metadata' => [
-                'floor_type' => fake()->randomElement(['Office', 'Retail', 'Residential', 'Mixed Use', 'Parking']),
-                'max_occupancy' => fake()->numberBetween(50, 500),
-                'facilities' => fake()->randomElements([
-                    'Restrooms',
-                    'Kitchen',
-                    'Conference Rooms',
-                    'Break Room',
-                    'Storage',
-                    'Server Room',
-                    'Elevator Access'
-                ], rand(3, 5)),
-                'emergency_equipment' => [
-                    'fire_extinguishers' => fake()->numberBetween(2, 10),
-                    'emergency_exits' => fake()->numberBetween(2, 4),
-                    'first_aid_kits' => fake()->numberBetween(1, 3)
+            'code' => $code,
+            'name' => $this->faker->unique()->words(3, true),
+            'level' => $this->faker->numberBetween(-5, 100),
+            'description' => $this->faker->paragraph(),
+            'status' => $this->faker->randomElement(['active', 'inactive', 'under_maintenance', 'under_renovation']),
+            'total_area' => $this->faker->numberBetween(500, 5000),
+            'usable_area' => $this->faker->numberBetween(400, 4500),
+            'common_area' => $this->faker->numberBetween(50, 500),
+            'occupancy_rate' => $this->faker->randomFloat(2, 0, 100),
+            'metadata' => json_encode([
+                'floor_type' => $this->faker->randomElement(['office', 'retail', 'residential', 'mixed', 'parking', 'mechanical']),
+                'max_occupancy' => $this->faker->numberBetween(50, 500),
+                'emergency_exits' => $this->faker->numberBetween(2, 6),
+                'facilities' => $this->faker->randomElements([
+                    'restrooms', 'kitchen', 'conference_rooms', 'elevator_lobby', 
+                    'storage', 'server_room', 'break_room', 'reception'
+                ], $this->faker->numberBetween(3, 6)),
+                'accessibility' => [
+                    'wheelchair_accessible' => $this->faker->boolean(80),
+                    'braille_signage' => $this->faker->boolean(70),
+                    'hearing_loop' => $this->faker->boolean(50)
                 ],
-                'access_control' => [
-                    'type' => fake()->randomElement(['Card Access', 'Biometric', 'Key Fob', 'None']),
-                    'restricted' => fake()->boolean()
+                'systems' => [
+                    'hvac_zones' => $this->faker->numberBetween(2, 8),
+                    'lighting_zones' => $this->faker->numberBetween(4, 12),
+                    'security_cameras' => $this->faker->numberBetween(4, 16),
+                    'access_points' => $this->faker->numberBetween(2, 6)
+                ],
+                'maintenance_schedule' => [
+                    'cleaning' => $this->faker->randomElement(['daily', 'weekly']),
+                    'inspection' => $this->faker->randomElement(['monthly', 'quarterly']),
+                    'pest_control' => $this->faker->randomElement(['monthly', 'quarterly'])
                 ]
-            ]
+            ])
         ];
     }
 

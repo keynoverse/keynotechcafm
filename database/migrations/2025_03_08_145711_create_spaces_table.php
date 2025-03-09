@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('code')->unique();
             $table->string('type');
-            $table->decimal('area', 10, 2)->nullable();
-            $table->integer('capacity')->nullable();
+            $table->text('description')->nullable();
+            $table->decimal('area', 10, 2)->default(0);
+            $table->integer('capacity')->default(0);
             $table->string('status')->default('active');
             $table->json('metadata')->nullable();
             $table->timestamps();

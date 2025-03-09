@@ -2,70 +2,77 @@
 
 namespace Database\Factories;
 
+use App\Models\WorkOrder;
+use App\Models\User;
 use App\Models\Asset;
 use App\Models\Space;
-use App\Models\User;
-use App\Models\WorkOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WorkOrderFactory extends Factory
 {
     protected $model = WorkOrder::class;
 
+    private static $workOrderNumber = 1;
+
     public function definition(): array
     {
+        $code = 'WO' . str_pad(static::$workOrderNumber++, 6, '0', STR_PAD_LEFT);
+        $status = $this->faker->randomElement(['pending', 'in_progress', 'completed', 'cancelled', 'on_hold']);
+        $priority = $this->faker->randomElement(['low', 'medium', 'high', 'urgent']);
+        
+        $startDate = $this->faker->dateTimeBetween('-1 month', '+1 month');
+        $dueDate = clone $startDate;
+        $dueDate->modify('+' . $this->faker->numberBetween(1, 30) . ' days');
+        
+        $completedDate = null;
+        if ($status === 'completed') {
+            $completedDate = clone $startDate;
+            $completedDate->modify('+' . $this->faker->numberBetween(1, 15) . ' days');
+        }
+
         return [
-            'title' => fake()->sentence(),
-            'description' => fake()->paragraph(),
+            'code' => $code,
+            'title' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'type' => $this->faker->randomElement(['repair', 'maintenance', 'inspection', 'installation', 'replacement']),
+            'priority' => $priority,
+            'status' => $status,
+            'requester_id' => User::factory(),
+            'assignee_id' => User::factory(),
             'asset_id' => Asset::factory(),
             'space_id' => Space::factory(),
-            'reported_by' => User::factory(),
-            'assigned_to' => User::factory(),
-            'priority' => fake()->randomElement(['low', 'medium', 'high', 'urgent']),
-            'status' => fake()->randomElement(['open', 'in_progress', 'on_hold', 'completed', 'cancelled']),
-            'type' => fake()->randomElement(['repair', 'maintenance', 'installation', 'inspection', 'emergency']),
-            'due_date' => fake()->dateTimeBetween('now', '+2 weeks'),
-            'start_date' => null,
-            'completion_date' => null,
-            'estimated_hours' => fake()->randomFloat(2, 1, 48),
-            'actual_hours' => null,
-            'cost_estimate' => fake()->randomFloat(2, 100, 5000),
-            'actual_cost' => null,
-            'metadata' => [
-                'category' => fake()->randomElement(['electrical', 'plumbing', 'hvac', 'structural', 'it']),
-                'location_details' => fake()->text(100),
-                'access_requirements' => fake()->randomElements([
-                    'Key required',
-                    'Security clearance',
-                    'Escort needed',
-                    'After hours only'
-                ], rand(1, 3)),
-                'safety_requirements' => fake()->randomElements([
-                    'PPE required',
-                    'Lock out/Tag out',
-                    'Confined space',
-                    'Hot work permit'
-                ], rand(1, 3)),
-                'parts_required' => fake()->randomElements([
-                    'Filters',
-                    'Belts',
-                    'Motors',
-                    'Switches',
-                    'Valves'
-                ], rand(0, 3)),
-                'tools_required' => fake()->randomElements([
-                    'Hand tools',
-                    'Power tools',
-                    'Diagnostic equipment',
-                    'Ladder',
-                    'Lift'
-                ], rand(1, 4)),
-                'impact_assessment' => [
-                    'severity' => fake()->randomElement(['low', 'medium', 'high']),
-                    'affected_users' => fake()->numberBetween(1, 100),
-                    'business_impact' => fake()->randomElement(['minimal', 'moderate', 'significant'])
+            'start_date' => $startDate,
+            'due_date' => $dueDate,
+            'completed_date' => $completedDate,
+            'estimated_hours' => $this->faker->randomFloat(2, 0.5, 8),
+            'actual_hours' => $status === 'completed' ? $this->faker->randomFloat(2, 0.5, 12) : null,
+            'estimated_cost' => $this->faker->randomFloat(2, 50, 5000),
+            'actual_cost' => $status === 'completed' ? $this->faker->randomFloat(2, 50, 7500) : null,
+            'metadata' => json_encode([
+                'category' => $this->faker->randomElement(['electrical', 'plumbing', 'hvac', 'structural', 'it', 'security']),
+                'skills_required' => $this->faker->randomElements([
+                    'electrical', 'plumbing', 'carpentry', 'hvac', 'it',
+                    'painting', 'welding', 'masonry', 'security'
+                ], $this->faker->numberBetween(1, 3)),
+                'parts_required' => $this->faker->boolean(70) ? $this->faker->randomElements([
+                    'screws', 'nails', 'pipes', 'wires', 'filters',
+                    'bulbs', 'fuses', 'switches', 'valves'
+                ], $this->faker->numberBetween(1, 4)) : [],
+                'safety_requirements' => $this->faker->randomElements([
+                    'safety_glasses', 'hard_hat', 'gloves', 'safety_shoes',
+                    'ear_protection', 'face_mask', 'fall_protection'
+                ], $this->faker->numberBetween(1, 4)),
+                'documentation' => [
+                    'manuals_required' => $this->faker->boolean(50),
+                    'photos_required' => $this->faker->boolean(70),
+                    'permits_required' => $this->faker->boolean(30)
+                ],
+                'follow_up' => [
+                    'inspection_required' => $this->faker->boolean(60),
+                    'testing_required' => $this->faker->boolean(50),
+                    'training_required' => $this->faker->boolean(30)
                 ]
-            ]
+            ])
         ];
     }
 
@@ -136,14 +143,14 @@ class WorkOrderFactory extends Factory
     public function assignedTo(User $user): static
     {
         return $this->state(fn (array $attributes) => [
-            'assigned_to' => $user->id
+            'assignee_id' => $user->id
         ]);
     }
 
     public function reportedBy(User $user): static
     {
         return $this->state(fn (array $attributes) => [
-            'reported_by' => $user->id
+            'requester_id' => $user->id
         ]);
     }
 } 

@@ -11,21 +11,25 @@ class AssetCategoryFactory extends Factory
 
     public function definition(): array
     {
+        static $categoryNumber = 1;
+
         return [
-            'name' => fake()->unique()->words(2, true),
-            'description' => fake()->paragraph(),
+            'name' => $this->faker->unique()->words(2, true),
+            'description' => $this->faker->paragraph(),
+            'status' => $this->faker->randomElement(['active', 'inactive']),
+            'metadata' => json_encode([
+                'icon' => $this->faker->randomElement(['computer', 'printer', 'server', 'hvac', 'furniture', 'vehicle']),
+                'color' => $this->faker->hexColor(),
+                'maintenance_frequency' => $this->faker->randomElement(['weekly', 'monthly', 'quarterly', 'yearly']),
+                'depreciation_rate' => $this->faker->randomFloat(2, 5, 25),
+                'warranty_required' => $this->faker->boolean(),
+                'requires_certification' => $this->faker->boolean(),
+                'risk_level' => $this->faker->randomElement(['low', 'medium', 'high']),
+                'asset_lifecycle' => $this->faker->randomElement(['3 years', '5 years', '8 years', '10 years'])
+            ]),
             'parent_id' => null,
-            'status' => fake()->randomElement(['active', 'inactive']),
-            'metadata' => [
-                'icon' => fake()->randomElement(['building', 'desktop', 'server', 'chair', 'air-conditioner', 'printer']),
-                'color' => fake()->hexColor(),
-                'maintenance_frequency' => fake()->randomElement(['daily', 'weekly', 'monthly', 'quarterly', 'yearly']),
-                'depreciation_rate' => fake()->randomFloat(2, 5, 25),
-                'warranty_required' => fake()->boolean(),
-                'requires_certification' => fake()->boolean(),
-                'risk_level' => fake()->randomElement(['low', 'medium', 'high']),
-                'asset_lifecycle' => fake()->numberBetween(1, 10) . ' years'
-            ]
+            '_lft' => 1,
+            '_rgt' => 2
         ];
     }
 
