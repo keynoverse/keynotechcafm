@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-abstract class BaseFormRequest extends FormRequest
+class BaseFormRequest extends FormRequest
 {
     /**
      * Handle a failed validation attempt.
@@ -33,7 +33,10 @@ abstract class BaseFormRequest extends FormRequest
      *
      * @return array
      */
-    abstract public function messages(): array;
+    public function messages(): array
+    {
+        return [];
+    }
 
     /**
      * Get custom attributes for validator errors.

@@ -4,6 +4,35 @@ namespace App\Http\Requests\Asset;
 
 use Illuminate\Validation\Rule;
 
+/**
+ * @OA\Schema(
+ *     schema="UpdateAssetRequest",
+ *     title="Update Asset Request",
+ *     description="Request body for updating an existing asset",
+ *     @OA\Property(property="category_id", type="integer", format="int64", example=1),
+ *     @OA\Property(property="space_id", type="integer", format="int64", example=1),
+ *     @OA\Property(property="name", type="string", example="Office Chair"),
+ *     @OA\Property(property="code", type="string", example="AST-001"),
+ *     @OA\Property(property="description", type="string", example="Ergonomic office chair"),
+ *     @OA\Property(property="model", type="string", example="XYZ-123"),
+ *     @OA\Property(property="manufacturer", type="string", example="ABC Corp"),
+ *     @OA\Property(property="serial_number", type="string", example="SN123456"),
+ *     @OA\Property(property="purchase_date", type="string", format="date", example="2023-01-01"),
+ *     @OA\Property(property="purchase_cost", type="number", format="float", example=299.99),
+ *     @OA\Property(property="warranty_expiry", type="string", format="date", example="2024-01-01"),
+ *     @OA\Property(property="maintenance_frequency", type="integer", example=30),
+ *     @OA\Property(property="maintenance_unit", type="string", enum={"days", "weeks", "months", "years"}, example="days"),
+ *     @OA\Property(property="next_maintenance_date", type="string", format="date", example="2023-12-31"),
+ *     @OA\Property(property="status", type="string", enum={"active", "inactive", "maintenance", "retired", "storage"}, example="active"),
+ *     @OA\Property(property="condition", type="string", enum={"excellent", "good", "fair", "poor"}, example="excellent"),
+ *     @OA\Property(property="criticality", type="string", enum={"high", "medium", "low"}, example="medium"),
+ *     @OA\Property(
+ *         property="metadata",
+ *         type="object",
+ *         example={"color": "black", "material": "leather", "warranty_details": "3 years limited warranty"}
+ *     )
+ * )
+ */
 class UpdateAssetRequest extends CreateAssetRequest
 {
     /**

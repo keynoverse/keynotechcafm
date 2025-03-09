@@ -1,0 +1,367 @@
+<template>
+  <BaseCard>
+    <!-- Header -->
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-900">Reports</h2>
+        <BaseButton
+          variant="primary"
+          @click="showGeneratorModal = true"
+        >
+          Generate Report
+        </BaseButton>
+      </div>
+    </template>
+
+    <!-- Filters -->
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <BaseInput
+        v-model="filters.search"
+        placeholder="Search reports..."
+        type="search"
+      >
+        <template #prefix>
+          <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </template>
+      </BaseInput>
+
+      <BaseSelect
+        v-model="filters.type"
+        :options="typeOptions"
+        placeholder="Filter by type"
+      />
+
+      <BaseSelect
+        v-model="filters.category"
+        :options="categoryOptions"
+        placeholder="Filter by category"
+      />
+
+      <BaseSelect
+        v-model="filters.generatedBy"
+        :options="userOptions"
+        placeholder="Filter by generator"
+      />
+    </div>
+
+    <!-- Table -->
+    <BaseTable
+      :columns="columns"
+      :data="filteredReports"
+      :loading="loading"
+      :sort-by="sortBy"
+      :sort-desc="sortDesc"
+      @update:sort-by="sortBy = $event"
+      @update:sort-desc="sortDesc = $event"
+    >
+      <template #cell-type="{ item }">
+        <span
+          :class="[
+            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+            typeClasses[item.type] || ''
+          ]"
+        >
+          {{ item.type }}
+        </span>
+      </template>
+
+      <template #cell-generated_at="{ item }">
+        {{ formatDate(item.generated_at) }}
+      </template>
+
+      <template #cell-actions="{ item }">
+        <div class="flex items-center space-x-2">
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            @click="viewReport(item)"
+          >
+            View
+          </BaseButton>
+          <BaseButton
+            variant="secondary"
+            size="sm"
+            @click="downloadReport(item)"
+          >
+            Download
+          </BaseButton>
+          <BaseButton
+            variant="danger"
+            size="sm"
+            @click="confirmDelete(item)"
+          >
+            Delete
+          </BaseButton>
+        </div>
+      </template>
+    </BaseTable>
+
+    <!-- Generator Modal -->
+    <ReportGenerator
+      v-if="showGeneratorModal"
+      :show="showGeneratorModal"
+      @update:show="showGeneratorModal = false"
+      @generated="handleGenerated"
+    />
+
+    <!-- View Modal -->
+    <ReportViewer
+      v-if="showViewModal"
+      :show="showViewModal"
+      :report="selectedReport"
+      @update:show="showViewModal = false"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <BaseModal
+      :model-value="showDeleteModal"
+      title="Delete Report"
+      @update:model-value="showDeleteModal = false"
+    >
+      <p class="mb-4 text-sm text-gray-500">
+        Are you sure you want to delete this report? This action cannot be undone.
+      </p>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <BaseButton
+            variant="secondary"
+            @click="showDeleteModal = false"
+          >
+            Cancel
+          </BaseButton>
+          <BaseButton
+            variant="danger"
+            :loading="deleting"
+            @click="deleteReport"
+          >
+            Delete
+          </BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+  </BaseCard>
+</template>
+
+<script>
+import { ref, computed, onMounted } from 'vue'
+import { useToast } from '@/composables/useToast'
+import { useApi } from '@/composables/useApi'
+
+export default {
+  name: 'ReportList',
+
+  setup() {
+    const { showToast } = useToast()
+    const api = useApi()
+
+    // State
+    const reports = ref([])
+    const loading = ref(true)
+    const deleting = ref(false)
+    const showGeneratorModal = ref(false)
+    const showViewModal = ref(false)
+    const showDeleteModal = ref(false)
+    const selectedReport = ref(null)
+    const sortBy = ref('generated_at')
+    const sortDesc = ref(true)
+
+    // Filters
+    const filters = ref({
+      search: '',
+      type: '',
+      category: '',
+      generatedBy: ''
+    })
+
+    // Table columns
+    const columns = [
+      { key: 'name', label: 'Name', sortable: true },
+      { key: 'type', label: 'Type', sortable: true },
+      { key: 'category', label: 'Category', sortable: true },
+      { key: 'generated_by', label: 'Generated By', sortable: true },
+      { key: 'generated_at', label: 'Generated At', sortable: true },
+      { key: 'actions', label: 'Actions', sortable: false }
+    ]
+
+    // Options
+    const typeOptions = [
+      { value: 'asset', label: 'Asset Report' },
+      { value: 'maintenance', label: 'Maintenance Report' },
+      { value: 'work_order', label: 'Work Order Report' },
+      { value: 'cost', label: 'Cost Analysis' },
+      { value: 'performance', label: 'Performance Report' }
+    ]
+
+    const categoryOptions = [
+      { value: 'daily', label: 'Daily Report' },
+      { value: 'weekly', label: 'Weekly Report' },
+      { value: 'monthly', label: 'Monthly Report' },
+      { value: 'quarterly', label: 'Quarterly Report' },
+      { value: 'annual', label: 'Annual Report' },
+      { value: 'custom', label: 'Custom Report' }
+    ]
+
+    const userOptions = ref([])
+
+    // Type classes for badges
+    const typeClasses = {
+      asset: 'bg-blue-100 text-blue-800',
+      maintenance: 'bg-green-100 text-green-800',
+      work_order: 'bg-yellow-100 text-yellow-800',
+      cost: 'bg-purple-100 text-purple-800',
+      performance: 'bg-red-100 text-red-800'
+    }
+
+    // Computed
+    const filteredReports = computed(() => {
+      let filtered = [...reports.value]
+
+      // Apply search filter
+      if (filters.value.search) {
+        const searchTerm = filters.value.search.toLowerCase()
+        filtered = filtered.filter(report =>
+          report.name.toLowerCase().includes(searchTerm) ||
+          report.description?.toLowerCase().includes(searchTerm)
+        )
+      }
+
+      // Apply type filter
+      if (filters.value.type) {
+        filtered = filtered.filter(report => report.type === filters.value.type)
+      }
+
+      // Apply category filter
+      if (filters.value.category) {
+        filtered = filtered.filter(report => report.category === filters.value.category)
+      }
+
+      // Apply generator filter
+      if (filters.value.generatedBy) {
+        filtered = filtered.filter(report => report.generated_by === filters.value.generatedBy)
+      }
+
+      return filtered
+    })
+
+    // Methods
+    const fetchReports = async () => {
+      try {
+        loading.value = true
+        const response = await api.get('/api/reports')
+        reports.value = response.data
+      } catch (error) {
+        showToast('Error fetching reports', 'error')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get('/api/users')
+        userOptions.value = response.data.map(user => ({
+          value: user.id,
+          label: user.name
+        }))
+      } catch (error) {
+        showToast('Error fetching users', 'error')
+      }
+    }
+
+    const viewReport = (report) => {
+      selectedReport.value = report
+      showViewModal.value = true
+    }
+
+    const downloadReport = async (report) => {
+      try {
+        const response = await api.get(`/api/reports/${report.id}/download`, {
+          responseType: 'blob'
+        })
+
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', report.name)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        showToast('Error downloading report', 'error')
+      }
+    }
+
+    const confirmDelete = (report) => {
+      selectedReport.value = report
+      showDeleteModal.value = true
+    }
+
+    const deleteReport = async () => {
+      try {
+        deleting.value = true
+        await api.delete(`/api/reports/${selectedReport.value.id}`)
+        await fetchReports()
+        showDeleteModal.value = false
+        showToast('Report deleted successfully')
+      } catch (error) {
+        showToast('Error deleting report', 'error')
+      } finally {
+        deleting.value = false
+      }
+    }
+
+    const handleGenerated = async () => {
+      await fetchReports()
+      showGeneratorModal.value = false
+      showToast('Report generated successfully')
+    }
+
+    const formatDate = (date) => {
+      if (!date) return ''
+      return new Date(date).toLocaleDateString()
+    }
+
+    // Lifecycle hooks
+    onMounted(async () => {
+      await Promise.all([
+        fetchReports(),
+        fetchUsers()
+      ])
+    })
+
+    return {
+      // State
+      reports,
+      loading,
+      deleting,
+      showGeneratorModal,
+      showViewModal,
+      showDeleteModal,
+      selectedReport,
+      sortBy,
+      sortDesc,
+      filters,
+
+      // Data
+      columns,
+      typeOptions,
+      categoryOptions,
+      userOptions,
+      typeClasses,
+
+      // Computed
+      filteredReports,
+
+      // Methods
+      viewReport,
+      downloadReport,
+      confirmDelete,
+      deleteReport,
+      handleGenerated,
+      formatDate
+    }
+  }
+}
+</script> 

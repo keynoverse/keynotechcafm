@@ -5,7 +5,11 @@ use App\Http\Controllers\Api\{
     BuildingController,
     FloorController,
     SpaceController,
-    AssetController
+    AssetController,
+    AssetCategoryController,
+    MaintenanceScheduleController,
+    MaintenanceLogController,
+    WorkOrderController
 };
 
 /*
@@ -81,5 +85,79 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/maintenance-schedule', [AssetController::class, 'getAssetWithMaintenanceSchedule']);
         Route::get('/{id}/statistics', [AssetController::class, 'getStatistics']);
         Route::post('/{id}/schedule-maintenance', [AssetController::class, 'scheduleNextMaintenance']);
+    });
+
+    // Asset Categories
+    Route::prefix('asset-categories')->group(function () {
+        Route::get('/', [AssetCategoryController::class, 'index']);
+        Route::post('/', [AssetCategoryController::class, 'store']);
+        Route::get('/active', [AssetCategoryController::class, 'active']);
+        Route::get('/hierarchy', [AssetCategoryController::class, 'hierarchy']);
+        Route::get('/search', [AssetCategoryController::class, 'search']);
+        Route::get('/{id}', [AssetCategoryController::class, 'show']);
+        Route::put('/{id}', [AssetCategoryController::class, 'update']);
+        Route::delete('/{id}', [AssetCategoryController::class, 'destroy']);
+        Route::patch('/{id}/move', [AssetCategoryController::class, 'move']);
+        Route::get('/{id}/children', [AssetCategoryController::class, 'children']);
+        Route::patch('/{id}/status', [AssetCategoryController::class, 'updateStatus']);
+    });
+
+    // Maintenance Schedules
+    Route::prefix('maintenance-schedules')->group(function () {
+        Route::get('/', [MaintenanceScheduleController::class, 'index']);
+        Route::post('/', [MaintenanceScheduleController::class, 'store']);
+        Route::get('/upcoming', [MaintenanceScheduleController::class, 'upcoming']);
+        Route::get('/overdue', [MaintenanceScheduleController::class, 'overdue']);
+        Route::get('/date-range', [MaintenanceScheduleController::class, 'getByDateRange']);
+        Route::get('/asset/{assetId}', [MaintenanceScheduleController::class, 'getAssetSchedules']);
+        Route::get('/status/{status}', [MaintenanceScheduleController::class, 'getByStatus']);
+        Route::get('/{id}', [MaintenanceScheduleController::class, 'show']);
+        Route::put('/{id}', [MaintenanceScheduleController::class, 'update']);
+        Route::delete('/{id}', [MaintenanceScheduleController::class, 'destroy']);
+        Route::post('/{id}/complete', [MaintenanceScheduleController::class, 'complete']);
+        Route::patch('/{id}/reschedule', [MaintenanceScheduleController::class, 'reschedule']);
+        Route::patch('/{id}/status', [MaintenanceScheduleController::class, 'updateStatus']);
+    });
+
+    // Maintenance Logs
+    Route::prefix('maintenance-logs')->group(function () {
+        Route::get('/', [MaintenanceLogController::class, 'index']);
+        Route::post('/', [MaintenanceLogController::class, 'store']);
+        Route::get('/asset/{assetId}', [MaintenanceLogController::class, 'getAssetLogs']);
+        Route::get('/schedule/{scheduleId}', [MaintenanceLogController::class, 'getScheduleLogs']);
+        Route::get('/date-range', [MaintenanceLogController::class, 'getByDateRange']);
+        Route::get('/type/{type}', [MaintenanceLogController::class, 'getByType']);
+        Route::get('/status/{status}', [MaintenanceLogController::class, 'getByStatus']);
+        Route::get('/technician/{technicianId}', [MaintenanceLogController::class, 'getByTechnician']);
+        Route::get('/{id}', [MaintenanceLogController::class, 'show']);
+        Route::put('/{id}', [MaintenanceLogController::class, 'update']);
+        Route::delete('/{id}', [MaintenanceLogController::class, 'destroy']);
+        Route::post('/{id}/attachments', [MaintenanceLogController::class, 'addAttachment']);
+        Route::delete('/{id}/attachments/{attachmentId}', [MaintenanceLogController::class, 'removeAttachment']);
+        Route::patch('/{id}/status', [MaintenanceLogController::class, 'updateStatus']);
+    });
+
+    // Work Orders
+    Route::prefix('work-orders')->group(function () {
+        Route::get('/', [WorkOrderController::class, 'index']);
+        Route::post('/', [WorkOrderController::class, 'store']);
+        Route::get('/asset/{assetId}', [WorkOrderController::class, 'getAssetWorkOrders']);
+        Route::get('/space/{spaceId}', [WorkOrderController::class, 'getSpaceWorkOrders']);
+        Route::get('/date-range', [WorkOrderController::class, 'getByDateRange']);
+        Route::get('/type/{type}', [WorkOrderController::class, 'getByType']);
+        Route::get('/priority/{priority}', [WorkOrderController::class, 'getByPriority']);
+        Route::get('/status/{status}', [WorkOrderController::class, 'getByStatus']);
+        Route::get('/assignee/{assigneeId}', [WorkOrderController::class, 'getByAssignee']);
+        Route::get('/requestor/{requestorId}', [WorkOrderController::class, 'getByRequestor']);
+        Route::get('/statistics', [WorkOrderController::class, 'statistics']);
+        Route::get('/{id}', [WorkOrderController::class, 'show']);
+        Route::put('/{id}', [WorkOrderController::class, 'update']);
+        Route::delete('/{id}', [WorkOrderController::class, 'destroy']);
+        Route::post('/{id}/comments', [WorkOrderController::class, 'addComment']);
+        Route::delete('/{id}/comments/{commentId}', [WorkOrderController::class, 'removeComment']);
+        Route::post('/{id}/attachments', [WorkOrderController::class, 'addAttachment']);
+        Route::delete('/{id}/attachments/{attachmentId}', [WorkOrderController::class, 'removeAttachment']);
+        Route::patch('/{id}/status', [WorkOrderController::class, 'updateStatus']);
+        Route::patch('/{id}/assign', [WorkOrderController::class, 'assign']);
     });
 }); 
