@@ -1,0 +1,65 @@
+/var/log/nginx/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    prerotate
+        if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+            run-parts /etc/logrotate.d/httpd-prerotate; \
+        fi \
+    endscript
+    postrotate
+        invoke-rc.d nginx rotate >/dev/null 2>&1
+    endscript
+}
+
+/var/www/kenyotechcafm/storage/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data www-data
+    su www-data www-data
+    dateext
+    dateformat -%Y%m%d
+    sharedscripts
+    postrotate
+        if [ -f /var/run/php/php8.1-fpm.pid ]; then
+            kill -USR1 $(cat /var/run/php/php8.1-fpm.pid)
+        fi
+    endscript
+}
+
+# Special handling for audit logs (keep longer)
+/var/www/kenyotechcafm/storage/logs/audit.log {
+    daily
+    missingok
+    rotate 90
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data www-data
+    su www-data www-data
+    dateext
+    dateformat -%Y%m%d
+}
+
+# Special handling for security logs
+/var/www/kenyotechcafm/storage/logs/security.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data www-data
+    su www-data www-data
+    dateext
+    dateformat -%Y%m%d
+} 

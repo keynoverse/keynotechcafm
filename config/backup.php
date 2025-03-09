@@ -7,7 +7,7 @@ return [
          * The name of this application. You can use this name to monitor
          * the backups.
          */
-        'name' => env('APP_NAME', 'CAFM-System'),
+        'name' => env('APP_NAME', 'laravel-backup'),
 
         'source' => [
             'files' => [
@@ -15,12 +15,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path('app'),
-                    base_path('config'),
-                    base_path('database'),
-                    base_path('resources'),
-                    base_path('routes'),
-                    base_path('storage/app/public'),
+                    base_path(),
                 ],
 
                 /*
@@ -29,9 +24,7 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
-                    base_path('storage/framework'),
-                    base_path('storage/logs'),
-                    base_path('.git'),
+                    storage_path('app/backup-temp'),
                 ],
 
                 /*
@@ -98,7 +91,7 @@ return [
          *
          * If you do not want any compressor at all, set it to null.
          */
-        'database_dump_compressor' => \Spatie\DbDumper\Compressors\GzipCompressor::class,
+        'database_dump_compressor' => \Spatie\Backup\Tasks\Backup\DbDumper\Compressors\GzipCompressor::class,
 
         /*
          * If specified, the database dumped file name will contain a timestamp (e.g.: 'Y-m-d-H-i-s').
@@ -151,7 +144,7 @@ return [
             /*
              * The filename prefix used for the backup zip file.
              */
-            'filename_prefix' => 'cafm-backup-',
+            'filename_prefix' => 'backup-',
 
             /*
              * The disk names on which the backups will be stored.
@@ -203,12 +196,12 @@ return [
      */
     'notifications' => [
         'notifications' => [
-            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail', 'slack'],
-            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail', 'slack'],
-            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail', 'slack'],
-            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['slack'],
-            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['slack'],
-            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['slack'],
+            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
         ],
 
         /*
@@ -218,25 +211,12 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_NOTIFICATION_EMAIL'),
+            'to' => env('BACKUP_NOTIFICATION_EMAIL', 'samer@keynoverse.tech'),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name' => env('MAIL_FROM_NAME', 'Example'),
+                'address' => env('MAIL_FROM_ADDRESS', 'samer@keynoverse.tech'),
+                'name' => env('MAIL_FROM_NAME', 'Kenyo Tech CAFM'),
             ],
-        ],
-
-        'slack' => [
-            'webhook_url' => env('BACKUP_SLACK_WEBHOOK_URL'),
-
-            /*
-             * If this is set to null the default channel of the webhook will be used.
-             */
-            'channel' => null,
-
-            'username' => null,
-
-            'icon' => null,
         ],
 
         'discord' => [
@@ -261,7 +241,7 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'CAFM-System'),
+            'name' => env('APP_NAME', 'laravel-backup'),
             'disks' => ['local', 's3'],
             'health_checks' => [
                 \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
