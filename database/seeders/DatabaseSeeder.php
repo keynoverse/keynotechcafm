@@ -15,13 +15,6 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             UserSeeder::class,
             BuildingSeeder::class,
-            FloorSeeder::class,
-            SpaceSeeder::class,
-            AssetCategorySeeder::class,
-            AssetSeeder::class,
-            MaintenanceScheduleSeeder::class,
-            MaintenanceLogSeeder::class,
-            WorkOrderSeeder::class,
         ]);
     }
 }

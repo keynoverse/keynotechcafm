@@ -15,6 +15,41 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    <!-- Buildings Management -->
+                    <x-nav-link :href="route('buildings.index')" :active="request()->routeIs('buildings.*')">
+                        {{ __('Buildings') }}
+                    </x-nav-link>
+
+                    <!-- Floors Management -->
+                    <x-nav-link :href="route('floors.index')" :active="request()->routeIs('floors.*')">
+                        {{ __('Floors') }}
+                    </x-nav-link>
+
+                    <!-- Spaces Management -->
+                    <x-nav-link :href="route('spaces.index')" :active="request()->routeIs('spaces.*')">
+                        {{ __('Spaces') }}
+                    </x-nav-link>
+
+                    <!-- Assets Management -->
+                    <x-nav-link :href="route('assets.index')" :active="request()->routeIs('assets.*')">
+                        {{ __('Assets') }}
+                    </x-nav-link>
+
+                    <!-- Work Orders -->
+                    <x-nav-link :href="route('work-orders.index')" :active="request()->routeIs('work-orders.*')">
+                        {{ __('Work Orders') }}
+                    </x-nav-link>
+
+                    <!-- Maintenance -->
+                    <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.*')">
+                        {{ __('Maintenance') }}
+                    </x-nav-link>
+
+                    <!-- Reports -->
+                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                        {{ __('Reports') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -37,6 +72,13 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
+
+                        <!-- Admin Settings -->
+                        @if(Auth::user()->hasRole('admin'))
+                        <x-dropdown-link :href="route('admin.settings')">
+                            {{ __('Settings') }}
+                        </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -70,6 +112,34 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('buildings.index')" :active="request()->routeIs('buildings.*')">
+                {{ __('Buildings') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('floors.index')" :active="request()->routeIs('floors.*')">
+                {{ __('Floors') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('spaces.index')" :active="request()->routeIs('spaces.*')">
+                {{ __('Spaces') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('assets.index')" :active="request()->routeIs('assets.*')">
+                {{ __('Assets') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('work-orders.index')" :active="request()->routeIs('work-orders.*')">
+                {{ __('Work Orders') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.*')">
+                {{ __('Maintenance') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
@@ -83,6 +153,13 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+
+                <!-- Responsive Admin Settings -->
+                @if(Auth::user()->hasRole('admin'))
+                <x-responsive-nav-link :href="route('admin.settings')">
+                    {{ __('Settings') }}
+                </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

@@ -13,47 +13,52 @@ class BuildingFactory extends Factory
 
     public function definition(): array
     {
-        $code = 'BLD' . str_pad(static::$buildingNumber++, 4, '0', STR_PAD_LEFT);
+        $status = $this->faker->randomElement(['active', 'inactive', 'maintenance']);
         
         return [
-            'code' => $code,
-            'name' => $this->faker->unique()->company() . ' Building',
-            'description' => $this->faker->paragraph(),
+            'code' => 'BLD' . str_pad(static::$buildingNumber++, 3, '0', STR_PAD_LEFT),
+            'name' => $this->faker->unique()->company(),
             'address' => $this->faker->address(),
-            'city' => $this->faker->city(),
-            'state' => $this->faker->state(),
-            'country' => $this->faker->country(),
-            'postal_code' => $this->faker->postcode(),
-            'latitude' => $this->faker->latitude(),
-            'longitude' => $this->faker->longitude(),
-            'status' => $this->faker->randomElement(['active', 'inactive', 'under_maintenance', 'under_construction']),
-            'year_built' => $this->faker->year(),
-            'total_floors' => $this->faker->numberBetween(1, 50),
-            'total_area' => $this->faker->numberBetween(1000, 100000),
-            'occupancy_rate' => $this->faker->randomFloat(2, 0, 100),
-            'metadata' => json_encode([
-                'construction_type' => $this->faker->randomElement(['concrete', 'steel', 'wood', 'hybrid']),
-                'building_class' => $this->faker->randomElement(['A', 'B', 'C']),
+            'status' => $status,
+            'year_built' => $this->faker->numberBetween(1990, 2023),
+            'total_area' => $this->faker->numberBetween(1000, 50000),
+            'metadata' => [
                 'emergency_contacts' => [
-                    'facility_manager' => [
+                    [
                         'name' => $this->faker->name(),
+                        'position' => 'Facility Manager',
                         'phone' => $this->faker->phoneNumber(),
-                        'email' => $this->faker->email()
+                        'email' => $this->faker->email(),
                     ],
-                    'security' => [
+                    [
                         'name' => $this->faker->name(),
-                        'phone' => $this->faker->phoneNumber()
-                    ]
+                        'position' => 'Security Manager',
+                        'phone' => $this->faker->phoneNumber(),
+                        'email' => $this->faker->email(),
+                    ],
                 ],
                 'certifications' => [
-                    'leed' => $this->faker->randomElement(['platinum', 'gold', 'silver', 'certified', null]),
-                    'energy_star' => $this->faker->boolean()
+                    'LEED' => $this->faker->randomElement(['None', 'Certified', 'Silver', 'Gold', 'Platinum']),
+                    'Energy Star' => $this->faker->boolean(70) ? $this->faker->numberBetween(75, 100) : null,
                 ],
-                'amenities' => $this->faker->randomElements([
-                    'parking', 'cafeteria', 'gym', 'conference_rooms', 
-                    'rooftop_garden', 'bike_storage', 'shower_facilities'
-                ], $this->faker->numberBetween(2, 5))
-            ])
+                'facilities' => [
+                    'parking_spaces' => $this->faker->numberBetween(50, 500),
+                    'elevators' => $this->faker->numberBetween(2, 8),
+                    'loading_docks' => $this->faker->numberBetween(1, 4),
+                    'security_desk' => $this->faker->boolean(90),
+                ],
+                'systems' => [
+                    'hvac' => [
+                        'type' => $this->faker->randomElement(['Central', 'Distributed', 'Hybrid']),
+                        'last_maintenance' => $this->faker->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
+                    ],
+                    'fire_safety' => [
+                        'sprinkler_system' => $this->faker->boolean(95),
+                        'fire_alarm' => $this->faker->boolean(100),
+                        'last_inspection' => $this->faker->dateTimeBetween('-3 months', 'now')->format('Y-m-d'),
+                    ],
+                ],
+            ],
         ];
     }
 

@@ -13,20 +13,12 @@ return new class extends Migration
     {
         Schema::create('buildings', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->string('code')->unique();
-            $table->text('description')->nullable();
-            $table->string('address');
-            $table->string('city');
-            $table->string('state');
-            $table->string('country');
-            $table->string('postal_code');
-            $table->decimal('latitude', 10, 8)->nullable();
-            $table->decimal('longitude', 11, 8)->nullable();
-            $table->integer('total_floors')->default(0);
-            $table->decimal('total_area', 12, 2)->default(0);
+            $table->string('name');
+            $table->text('address');
+            $table->enum('status', ['active', 'inactive', 'maintenance'])->default('active');
             $table->integer('year_built')->nullable();
-            $table->string('status')->default('active');
+            $table->decimal('total_area', 10, 2)->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->softDeletes();
